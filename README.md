@@ -1,4 +1,4 @@
-# Support-Vector-Regression
+# Support Vector Regression
 
 [Scikit learn on Support Vector Regressors](http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html)
 

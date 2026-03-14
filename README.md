@@ -19,7 +19,7 @@ Both implementations use the RBF (Radial Basis Function) kernel and produce visu
 
 10 rows, 3 columns. The model uses `Level` as the feature and `Salary` as the target.
 
-## Methodology
+## Approach
 
 1. Load the dataset and extract features (`Level`) and target (`Salary`)
 2. Apply feature scaling (Python only — `StandardScaler` on both X and y)
@@ -30,7 +30,7 @@ Both implementations use the RBF (Radial Basis Function) kernel and produce visu
 
 ### Kernel
 
-The RBF (Gaussian) kernel maps inputs into a higher-dimensional space to capture non-linear relationships:
+The RBF (Gaussian) kernel is used in both implementations:
 
 - **Python:** `SVR(kernel='rbf')` via scikit-learn
 - **R:** `svm(type='eps-regression', kernel='radial')` via the `e1071` package
@@ -44,24 +44,24 @@ Position_Salaries.csv   # Dataset
 Rbf/                    # Kernel equation diagrams (PNG)
 ```
 
-## Tech Stack
-
-| Component       | Technology                          |
-|-----------------|-------------------------------------|
-| 🐍 Language     | Python 3.x, R                       |
-| 📊 ML Library   | scikit-learn (`SVR`), e1071 (`svm`) |
-| 📈 Visualization| matplotlib, ggplot2                 |
-| 🧮 Data         | pandas, numpy                       |
-
 ## Dependencies
 
 ### Python
+
+- Python 3.x
+- numpy
+- matplotlib
+- pandas
+- scikit-learn
 
 ```bash
 pip install numpy matplotlib pandas scikit-learn
 ```
 
 ### R
+
+- e1071
+- ggplot2
 
 ```r
 install.packages(c("e1071", "ggplot2"))
@@ -83,9 +83,11 @@ Rscript svr.R
 
 ## Known Issues
 
-- The train/test split is commented out in both implementations — the entire dataset is used for fitting and visualization. Fine for a demo, but not suitable for real model evaluation.
-- The R implementation uses positional column indexing (`dataset[2:3]`), which is fragile if the CSV structure changes.
-- The dataset is very small (10 rows), so SVR performance here is illustrative rather than production-grade.
+- **`svr.py` — deprecated `StandardScaler` usage on 1D arrays:** `sc_y.fit_transform(y)` passes a 1D array where a 2D array is expected. Modern scikit-learn will raise a warning or error. Fix: reshape `y` with `y.reshape(-1, 1)` before scaling.
+- **`svr.py` — `regressor.predict(6.5)` passes a raw scalar:** Modern scikit-learn expects a 2D array. This will raise a `ValueError`. Should be `regressor.predict([[6.5]])` (and the value should be scaled first).
+- **`svr.py` — `inverse_transform` on predict output:** The predict result also needs reshaping for newer scikit-learn versions.
+- **`svr.py` — train/test split is commented out:** The entire dataset is used for both fitting and visualization. Fine for a demo, but not a real evaluation.
+- **`svr.R` — `dataset[2:3]` drops the Position column but keeps Level and Salary:** This works, but the column subsetting is fragile and not self-documenting.
 
 ## License
 

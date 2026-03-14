@@ -19,7 +19,7 @@ from sklearn.preprocessing import StandardScaler
 sc_X = StandardScaler()
 sc_y = StandardScaler()
 X = sc_X.fit_transform(X)
-y = sc_y.fit_transform(y.reshape(-1, 1)).ravel()
+y = sc_y.fit_transform(y)
 
 # Fitting SVR to the dataset
 from sklearn.svm import SVR
@@ -27,8 +27,8 @@ regressor = SVR(kernel = 'rbf')
 regressor.fit(X, y)
 
 # Predicting a new result
-y_pred = regressor.predict(sc_X.transform([[6.5]]))
-y_pred = sc_y.inverse_transform(y_pred.reshape(-1, 1)).ravel()
+y_pred = regressor.predict(6.5)
+y_pred = sc_y.inverse_transform(y_pred)
 
 # Visualising the SVR results
 plt.scatter(X, y, color = 'red')

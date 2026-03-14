@@ -1,49 +1,61 @@
-# SVR
+# SVR — Support Vector Regression
+# Predicting salaries from position levels using an RBF kernel
 
-# Importing the libraries
-import numpy as np
+import os
+
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-
-# Importing the dataset
-dataset = pd.read_csv('Position_Salaries.csv')
-X = dataset.iloc[:, 1:2].values
-y = dataset.iloc[:, 2].values
-
-# Splitting the dataset into the Training set and Test set
-"""from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)"""
-
-# Feature Scaling
 from sklearn.preprocessing import StandardScaler
-sc_X = StandardScaler()
-sc_y = StandardScaler()
-X = sc_X.fit_transform(X)
-y = sc_y.fit_transform(y.reshape(-1, 1)).ravel()
-
-# Fitting SVR to the dataset
 from sklearn.svm import SVR
-regressor = SVR(kernel = 'rbf')
-regressor.fit(X, y)
 
-# Predicting a new result
-y_pred = regressor.predict(sc_X.transform([[6.5]]))
-y_pred = sc_y.inverse_transform(y_pred.reshape(-1, 1)).ravel()
 
-# Visualising the SVR results
-plt.scatter(X, y, color = 'red')
-plt.plot(X, regressor.predict(X), color = 'blue')
-plt.title('Truth or Bluff (SVR)')
-plt.xlabel('Position level')
-plt.ylabel('Salary')
-plt.show()
+def main():
+    # ── Load dataset (relative to script location) ──────────────────────
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_path = os.path.join(script_dir, "Position_Salaries.csv")
+    dataset = pd.read_csv(csv_path)
 
-# Visualising the SVR results (for higher resolution and smoother curve)
-X_grid = np.arange(min(X), max(X), 0.01) # choice of 0.01 instead of 0.1 step because the data is feature scaled
-X_grid = X_grid.reshape((len(X_grid), 1))
-plt.scatter(X, y, color = 'red')
-plt.plot(X_grid, regressor.predict(X_grid), color = 'blue')
-plt.title('Truth or Bluff (SVR)')
-plt.xlabel('Position level')
-plt.ylabel('Salary')
-plt.show()
+    X = dataset.iloc[:, 1:2].values  # Level (2D array)
+    y = dataset.iloc[:, 2].values    # Salary (1D array)
+
+    # ── Feature Scaling ─────────────────────────────────────────────────
+    sc_X = StandardScaler()
+    sc_y = StandardScaler()
+    X_scaled = sc_X.fit_transform(X)
+    y_scaled = sc_y.fit_transform(y.reshape(-1, 1)).ravel()
+
+    # ── Fit SVR (RBF kernel) ────────────────────────────────────────────
+    regressor = SVR(kernel="rbf")
+    regressor.fit(X_scaled, y_scaled)
+
+    # ── Predict salary for level 6.5 ───────────────────────────────────
+    level_input = np.array([[6.5]])
+    y_pred_scaled = regressor.predict(sc_X.transform(level_input))
+    y_pred = sc_y.inverse_transform(y_pred_scaled.reshape(-1, 1)).ravel()
+    print(f"Predicted salary for level 6.5: ${y_pred[0]:,.0f}")
+
+    # ── Visualise SVR results ───────────────────────────────────────────
+    plt.scatter(X_scaled, y_scaled, color="red", label="Actual")
+    plt.plot(X_scaled, regressor.predict(X_scaled), color="blue", label="SVR")
+    plt.title("Truth or Bluff (SVR)")
+    plt.xlabel("Position level (scaled)")
+    plt.ylabel("Salary (scaled)")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+    # ── Higher-resolution smooth curve ──────────────────────────────────
+    X_grid = np.arange(X_scaled.min(), X_scaled.max(), 0.01).reshape(-1, 1)
+    plt.scatter(X_scaled, y_scaled, color="red", label="Actual")
+    plt.plot(X_grid, regressor.predict(X_grid), color="blue", label="SVR")
+    plt.title("Truth or Bluff (SVR — smooth)")
+    plt.xlabel("Position level (scaled)")
+    plt.ylabel("Salary (scaled)")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
